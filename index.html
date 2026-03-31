@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANT'S BURGER</title>
+<style>
+body {font-family: Arial; margin:0; background:#0f0f0f; color:#fff;}
+header {background:#c40000; padding:15px; text-align:center; font-size:24px; font-weight:bold;}
+.container {padding:20px; max-width:900px; margin:auto;}
+.card {background:#1c1c1c; padding:15px; margin-bottom:10px; border-radius:12px; display:flex; align-items:center; justify-content:space-between;}
+.item-info {display:flex; align-items:center; gap:10px;}
+.item-info img {width:60px; height:60px; border-radius:10px;}
+.controls button {margin:2px; padding:5px 10px;}
+button {background:#ff0000; color:#fff; border:none; border-radius:8px; cursor:pointer;}
+input, select {width:100%; padding:10px; margin:5px 0; border-radius:8px; border:none;}
+#finalizar {width:100%; font-size:16px;}
+</style>
+</head>
+<body>
+<header>🍔 SANT'S BURGER</header><div class="container">
+<h2>📍 Vitória do Xingu - PA</h2><h2>🍔 Lanches</h2>
+<div id="produtos"></div><h2>🥤 Bebidas</h2>
+<div id="bebidas"></div><h3>🛒 Seu Pedido:</h3>
+<ul id="lista"></ul>
+<h3>Total: R$ <span id="total">0</span></h3><h3>👤 Dados</h3>
+<input id="nome" placeholder="Seu nome">
+<input id="endereco" placeholder="Endereço"><select id="pagamento">
+<option>Pix</option>
+<option>Dinheiro</option>
+<option>Cartão</option>
+</select>
+<input id="troco" placeholder="Troco?"><button id="finalizar">Finalizar Pedido</button>
+
+</div><script>
+const itens = [
+{name:"X-Burguer", preco:16, img:"https://i.imgur.com/6X4K6Qp.png"},
+{name:"X-Calabresa", preco:18, img:"https://i.imgur.com/6X4K6Qp.png"},
+{name:"X-Tudo", preco:22, img:"https://i.imgur.com/6X4K6Qp.png"}
+];
+
+const bebidas = [
+{name:"Refri Xingu 2L", preco:5},
+{name:"Refri Lata", preco:4}
+];
+
+let carrinho = {};
+
+function render(){
+let pDiv = document.getElementById('produtos');
+pDiv.innerHTML='';
+
+itens.forEach(item=>{
+pDiv.innerHTML += `
+<div class="card">
+<div class="item-info">
+<img src="${item.img}">
+<span>${item.name} - R$${item.preco}</span>
+</div>
+<div class="controls">
+<button onclick="add('${item.name}',${item.preco})">+</button>
+<button onclick="removeItem('${item.name}')">-</button>
+</div>
+</div>`;
+});
+
+let bDiv = document.getElementById('bebidas');
+bDiv.innerHTML='';
+
+bebidas.forEach(item=>{
+bDiv.innerHTML += `
+<div class="card">
+<span>${item.name} - R$${item.preco}</span>
+<div class="controls">
+<button onclick="selectSabor('${item.name}',${item.preco})">+</button>
+</div>
+</div>`;
+});
+}
+
+function add(nome, preco){
+if(!carrinho[nome]) carrinho[nome]={qtd:0,preco};
+carrinho[nome].qtd++;
+atualizar();
+}
+
+function removeItem(nome){
+if(carrinho[nome]){
+carrinho[nome].qtd--;
+if(carrinho[nome].qtd<=0) delete carrinho[nome];
+atualizar();
+}
+}
+
+function selectSabor(nome, preco){
+let sabores = ['Laranja','Coca-Cola','Guaraná','Fanta Uva','Pepsi'];
+let sabor = prompt("Escolha: " + sabores.join(', '));
+if(sabor){
+let key = nome + " - " + sabor;
+if(!carrinho[key]) carrinho[key]={qtd:0,preco};
+carrinho[key].qtd++;
+atualizar();
+}
+}
+
+function atualizar(){
+let lista = document.getElementById('lista');
+lista.innerHTML='';
+let total=0;
+
+for(let item in carrinho){
+let obj=carrinho[item];
+let li=document.createElement('li');
+li.innerText=`${obj.qtd}x ${item}`;
+lista.appendChild(li);
+total += obj.qtd * obj.preco;
+}
+
+document.getElementById('total').innerText=total;
+}
+
+render();
+
+// som de pedido
+function tocarSom(){
+let audio = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
+audio.play();
+}
+
+// finalizar pedido
+
+document.getElementById('finalizar').addEventListener('click',()=>{
+let nome = document.getElementById('nome').value;
+let endereco = document.getElementById('endereco').value;
+let pagamento = document.getElementById('pagamento').value;
+let troco = document.getElementById('troco').value;
+
+let pedido='';
+let total=0;
+
+for(let item in carrinho){
+pedido += `- ${carrinho[item].qtd}x ${item}%0A`;
+total += carrinho[item].qtd * carrinho[item].preco;
+}
+
+let msg = `🍔 *SANT'S BURGER*%0A%0A👤 ${nome}%0A📍 ${endereco}%0A%0A🛒 Pedido:%0A${pedido}%0A💰 Total: R$${total}%0A💳 ${pagamento}%0A${pagamento==='Dinheiro'? '💵 Troco: '+troco:''}`;
+
+let numero="5593991690572";
+tocarSom();
+window.open(`https://wa.me/${numero}?text=${msg}`);
+});
+</script></body>
+</html>
